@@ -1,6 +1,6 @@
 <h1>{{ test_suite.name }}</h1>
 <ul>
 {% for test_case in test_suite.testcase_set.all %}
-    <li>{{ test_case.name }}</li>
+    <li><a href="{% url 'tests:test_case' test_suite.id test_case.id %}">{{ test_case.name }}</a></li>
 {% endfor %}
 </ul>
