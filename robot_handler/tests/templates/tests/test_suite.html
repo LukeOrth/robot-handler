@@ -1,6 +1,6 @@
 <h1>{{ test_suite.name }}</h1>
 <ul>
-{% for test_case in test_suite.test_case_set.all %}
+{% for test_case in test_suite.testcase_set.all %}
     <li>{{ test_case.name }}</li>
 {% endfor %}
 </ul>
