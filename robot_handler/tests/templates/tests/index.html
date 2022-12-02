@@ -1,3 +1,8 @@
+<form action="{% url 'tests:refresh_tests' %}" method="post">
+{% csrf_token %}
+<button type="submit" name='refresh_tests'>Refresh Tests</button>
+</form>
+
 {% if test_suite_list %}
     <ul>
     {% for test_suite in test_suite_list %}

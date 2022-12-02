@@ -1,12 +1,17 @@
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponse 
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import TestSuite, TestCase
+from .scripts import testing
 
 def index(request):
     test_suite_list = TestSuite.objects.order_by('name')
     context = {'test_suite_list': test_suite_list}
     return render(request, 'tests/index.html', context)
+
+def refresh_tests(request):
+    testing.run('luke was here')
+    return redirect('tests:index')
 
 def test_suite(request, test_suite_id):
     test_suite = get_object_or_404(TestSuite, pk=test_suite_id)

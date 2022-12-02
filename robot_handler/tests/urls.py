@@ -5,6 +5,7 @@ from . import views
 app_name = 'tests'
 urlpatterns = [
         path('', views.index, name='index'),
+        path('refresh/', views.refresh_tests, name='refresh_tests'),
         path('<int:test_suite_id>/', views.test_suite, name='test_suite'),
         path('<int:test_suite_id>/results/', views.test_suite_results, name='test_suite_results'),
         path('<int:test_suite_id>/run/', views.test_suite_run, name='test_suite_run'),
