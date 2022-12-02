@@ -1,14 +1,20 @@
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+
+from .models import TestSuite, TestCase
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the tests index.")
+    test_suite_list = TestSuite.objects.order_by('name')
+    context = {'test_suite_list': test_suite_list}
+    return render(request, 'tests/index.html', context)
 
-def detail(request, question_id):
-    return HttpResponse("You're looking at question %s." % question_id)
+def detail(request, test_suite_id):
+    test_suite = get_object_or_404(TestSuite, pk=test_suite_id)
+    return render(request, 'tests/detail.html', {'test_suite': test_suite})
 
-def results(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
+def results(request, test_suite_id):
+    response = "You're looking at the results of test suite %s."
+    return HttpResponse(response % test_suite_id)
 
-def vote(request, question_id):
-    return HttpResponse("You're voting on question %s." % question_id)
+def run(request, test_suite_id):
+    return HttpResponse("You're running test suite %s." % test_suite_id)
