@@ -1,8 +1,9 @@
-from django.http import HttpResponse 
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import TestSuite, TestCase
-from .scripts import testing
+from .forms import RefreshTests, RobotLocation
+from .models import Settings, TestSuite, TestCase
+from .scripts import testing, get_robot_location
 
 def index(request):
     test_suite_list = TestSuite.objects.order_by('name')
@@ -10,8 +11,23 @@ def index(request):
     return render(request, 'tests/index.html', context)
 
 def refresh_tests(request):
-    testing.run('luke was here')
-    return redirect('tests:index')
+    refresh_tests_form = None
+    robot_location_form = None
+    if request.method == 'POST':
+        if 'refresh_tests' in request.POST:
+            refresh_tests_form = RefreshTests(request.POST)
+            testing.run('luke was here')
+            return redirect('tests:index')
+        if 'robot_location' in request.POST:
+            robot_location_form = RobotLocation(request.POST)
+            print(get_robot_location.run())
+            return redirect('tests:index')
+    context = {
+        'refresh_tests_form': refresh_tests_form,
+        'robot_location_form': robot_location_form,
+    }
+
+    return render(request, 'tests/index.html', context=context)
 
 def test_suite(request, test_suite_id):
     test_suite = get_object_or_404(TestSuite, pk=test_suite_id)

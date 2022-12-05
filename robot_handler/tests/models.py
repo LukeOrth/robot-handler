@@ -1,4 +1,12 @@
+import os
+from django.conf import settings
 from django.db import models
+
+def images_path():
+    return os.path.join(settings.LOCAL_FILE_DIR, 'images')
+
+class Settings(models.Model):
+    robot_location = models.FilePathField(path=images_path)
 
 class TestSuite(models.Model):
     name = models.CharField(max_length=200)

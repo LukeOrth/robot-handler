@@ -1,6 +1,13 @@
 <form action="{% url 'tests:refresh_tests' %}" method="post">
+{{ refresh_tests_form.as_p }}
 {% csrf_token %}
 <button type="submit" name='refresh_tests'>Refresh Tests</button>
+</form>
+
+<form action="{% url 'tests:refresh_tests' %}" method="post">
+{{ robot_location_form }}
+{% csrf_token %}
+<button type="submit" name='robot_location'>Robot Location</button>
 </form>
 
 {% if test_suite_list %}
