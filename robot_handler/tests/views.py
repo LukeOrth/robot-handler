@@ -2,8 +2,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RefreshTests, RobotLocation
-from .models import Settings, TestSuite, TestCase
-from .scripts import testing, get_robot_location
+from .models import FileLocations, TestSuite, TestCase
+from .scripts import testing, get_robot_dir
 
 def index(request):
     test_suite_list = TestSuite.objects.order_by('name')
@@ -20,7 +20,7 @@ def refresh_tests(request):
             return redirect('tests:index')
         if 'robot_location' in request.POST:
             robot_location_form = RobotLocation(request.POST)
-            print(get_robot_location.run())
+            get_robot_dir.run()
             return redirect('tests:index')
     context = {
         'refresh_tests_form': refresh_tests_form,
