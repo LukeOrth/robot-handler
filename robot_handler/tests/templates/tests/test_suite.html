@@ -11,7 +11,7 @@
     <tr>
         {% for test_case in test_suite.testcase_set.all %}
         <td><a href="{% url 'tests:test_case' test_suite.id test_case.id %}">{{ test_case.name }}</a></td>
-        <td>{{ test_case.documentation }}</td>
+        <td>{{ test_case.documentation|linebreaks }}</td>
     </tr>
 {% endfor %}
 </table>

@@ -16,7 +16,7 @@ class TestSuitePrototype:
         self.test_setup = ''
         self.test_teardown = ''
         self.test_timeout = ''
-        self.path = ''
+        self.source = ''
 
 class TestCasePrototype:
     def __init__(self):
@@ -27,7 +27,7 @@ class TestCasePrototype:
         self.teardown = ''
         self.timeout = ''
         self.body = ''
-        self.path = ''
+        self.source = ''
 
 class TagsPrototype:
     def __init__(self):
@@ -54,7 +54,7 @@ class TemplatesPrototype:
 class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPrototype):
 
     def __init__(self):
-        self.path = None
+        self.source = None
         self.test_suite = None
         self.test_cases = []
         self.tags = []
@@ -63,16 +63,16 @@ class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPr
         self.templates = []
 
     def visit_File(self, node):
-        self.path = node.source
+        self.source = node.source
         self.generic_visit(node)
 
     def visit_SettingSection(self, node):
         ts = TestSuitePrototype()
 
         # TestSuite: Name
-        ts.name = Path(self.path).stem
+        ts.name = Path(self.source).stem
         # TestSuite: Path
-        ts.path = self.path
+        ts.source = self.source
         for i in ast.iter_child_nodes(node):
             # TestSuite: documentation
             if type(i) == Documentation:
@@ -164,15 +164,15 @@ def update_tags(tags, fk):
         
 def run(param="Luke was here"):
 
-    # get current robot_dir
-    robot_dir = FileLocations.objects.filter(pk='robot_dir').first().location
+    # Get the "/tests" directory from DB
+    tests_dir = FileLocations.objects.filter(pk='tests_dir').first().location
 
-    if robot_dir:
+    if tests_dir:
         test_cases = TestCase.objects.all().delete()
         test_suites = TestSuite.objects.all().delete()
         tags = Tags.objects.all().delete()
         
-        p = Path(robot_dir.name)
+        p = Path(tests_dir.name)
         for f in p.rglob('*.robot'):
             model = get_model(f)
             parser = RobotParser()
