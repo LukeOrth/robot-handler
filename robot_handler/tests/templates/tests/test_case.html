@@ -1,2 +1,19 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'tests/style.css' %}">
+
 <h1>{{ test_case.name }}</h1>
-<p>{{ test_case.documentation }}</p>
+<table description="test_case_details">
+    <tr>
+        <th>Documentation</th>
+        <th>Setup</th>
+        <th>Teardown</th>
+        <th>Timeout</th>
+    </tr>
+    <tr>
+        <td>{{ test_case.documentation|linebreaks }}</td>
+        <td>{{ test_case.setup }}</td>
+        <td>{{ test_case.teardown }}</td>
+        <td>{{ test_case.timeout }}</td>
+    </tr>
+</table>

@@ -1,6 +1,17 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'tests/style.css' %}">
+
 <h1>{{ test_suite.name }}</h1>
-<ul>
-{% for test_case in test_suite.testcase_set.all %}
-    <li><a href="{% url 'tests:test_case' test_suite.id test_case.id %}">{{ test_case.name }}</a></li>
+<table description="test_suites">
+    <tr>
+        <th>Test Case</th>
+        <th>Documentation</th>
+    </tr>
+    <tr>
+        {% for test_case in test_suite.testcase_set.all %}
+        <td><a href="{% url 'tests:test_case' test_suite.id test_case.id %}">{{ test_case.name }}</a></td>
+        <td>{{ test_case.documentation }}</td>
+    </tr>
 {% endfor %}
-</ul>
+</table>
