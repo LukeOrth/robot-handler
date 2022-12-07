@@ -171,6 +171,9 @@ def run(param="Luke was here"):
         test_cases = TestCase.objects.all().delete()
         test_suites = TestSuite.objects.all().delete()
         tags = Tags.objects.all().delete()
+        metadata = Metadata.objects.all().delete()
+        libraries = Libraries.objects.all().delete()
+        templates = Templates.objects.all().delete()
         
         p = Path(tests_dir.name)
         for f in p.rglob('*.robot'):
