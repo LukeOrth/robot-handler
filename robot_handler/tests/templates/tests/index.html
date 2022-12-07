@@ -4,6 +4,9 @@
 <button type="submit" name='refresh_tests'>Refresh Tests</button>
 </form>
 
+{% if robot_dir %}
+    <p>{{ robot_dir.location }}</p>
+{% endif %}
 <form action="{% url 'tests:refresh_tests' %}" method="post">
 {{ robot_location_form }}
 {% csrf_token %}

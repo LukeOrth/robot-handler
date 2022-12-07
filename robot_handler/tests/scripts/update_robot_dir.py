@@ -8,6 +8,5 @@ def run():
     root = Tk()
     root.withdraw()
     dir_selected = filedialog.askdirectory()
-    print(dir_selected)
 
     FileLocations.objects.filter(pk='robot_dir').update(location=dir_selected)

@@ -3,11 +3,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RefreshTests, RobotLocation
 from .models import FileLocations, TestSuite, TestCase
-from .scripts import testing, get_robot_dir
+from .scripts import update_tests, update_robot_dir
 
 def index(request):
     test_suite_list = TestSuite.objects.order_by('name')
-    context = {'test_suite_list': test_suite_list}
+    robot_dir = FileLocations.objects.filter(pk='robot_dir').first()
+
+    context = {
+        'robot_dir': robot_dir,
+        'test_suite_list': test_suite_list,
+    }
     return render(request, 'tests/index.html', context)
 
 def refresh_tests(request):
@@ -16,11 +21,11 @@ def refresh_tests(request):
     if request.method == 'POST':
         if 'refresh_tests' in request.POST:
             refresh_tests_form = RefreshTests(request.POST)
-            testing.run('luke was here')
+            update_tests.run('evan was here')
             return redirect('tests:index')
         if 'robot_location' in request.POST:
             robot_location_form = RobotLocation(request.POST)
-            get_robot_dir.run()
+            update_robot_dir.run()
             return redirect('tests:index')
     context = {
         'refresh_tests_form': refresh_tests_form,
