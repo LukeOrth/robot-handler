@@ -1,6 +1,6 @@
-{% load static %}
+{% extends "tests/base.html" %}
 
-<link rel="stylesheet" href="{% static 'tests/css/style.css' %}">
+{% block content %}
 
 <h1>{{ test_case.name }}</h1>
 <table description="test_case_details">
@@ -17,3 +17,5 @@
         <td>{{ test_case.timeout }}</td>
     </tr>
 </table>
+
+{% endblock %}

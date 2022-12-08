@@ -17,6 +17,9 @@ def index(request):
     }
     return render(request, 'tests/index.html', context)
 
+def vue_test(request):
+    return render(request, 'tests/vue_test.html')
+
 def refresh_tests(request):
     refresh_tests_form = None
     robot_location_form = None

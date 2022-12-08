@@ -1,17 +1,23 @@
-{% load static %}
+{% extends "tests/base.html" %}
 
-<link rel="stylesheet" href="{% static 'tests/css/style.css' %}">
-<script type="text/javascript" src="{% static 'tests/js/table_search.js' %}"></script>
+{% block content %}
+
+<div class="input-group">
+    <div class="custom-file btn">
+        <input type="text" class="custom-file-input" id="inputGroupFile04" placeholder="Robot project directory..." value="{{ robot_dir.location }}" readonly>
+        <label class="custom-file-label" for="inputGroupFile04">Choose file</label>
+    </div>
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button">Button</button>
+    </div>
+</div>
 
 <form action="{% url 'tests:refresh_tests' %}" method="post">
 {{ refresh_tests_form.as_p }}
 {% csrf_token %}
-<button type="submit" name='refresh_tests'>Refresh Tests</button>
+<button type="submit" name='refresh_tests' class="btn btn-primary">Refresh Tests</button>
 </form>
 
-{% if robot_dir %}
-    <p>{{ robot_dir.location }}</p>
-{% endif %}
 <form action="{% url 'tests:refresh_tests' %}" method="post">
 {{ robot_location_form }}
 {% csrf_token %}
@@ -19,14 +25,14 @@
 </form>
 
 <input type="text" id="search-table">
-<table summary="test_suites" class="searchable-table">
-    <thead>
+<table summary="test_suites" class="table table-striped table-hover table-sm searchable-table">
+    <thead class="table-dark">
         <tr>
-            <th>
-                <input type="text" class="search-column" placeholder="Test Suite">
+            <th scope="col">
+                <input type="text" class="bg-dark border-0 text-light search-column" placeholder="Test Suite">
             </th>
-            <th>
-                <input type="text" class="search-column" placeholder="Documentation">
+            <th scope="col">
+                <input type="text" class="bg-dark border-0 text-light search-column" placeholder="Documentation">
             </th>
         </tr>
     </thead>
@@ -34,12 +40,12 @@
         {% if test_category_list %}
             {% for test_category in test_category_list %}
                 <tr class="{{ test_category|lower }}">
-                    <td>{{ test_category.name }}</td>
+                    <td colspan="2">{{ test_category.name }}</td>
                 </tr>
                 {% for test_suite in test_suite_list %}
                     {% if test_suite.test_category == test_category %}
-                    <tr class="{{ test_category|lower }}">
-                            <td><a href="{% url 'tests:test_suite' test_suite.id %}">{{ test_suite.name }}</a></td>
+                        <tr class="{{ test_category|lower }}">
+                            <td><a href="{{ test_suite.get_absolute_url }}">{{ test_suite.name }}</a></td>
                             <td>{{ test_suite.documentation|linebreaks }}</td>
                         </tr>
                     {% endif %}
@@ -53,3 +59,5 @@
         {% endif %}
     </tbody>
 </table>
+
+{% endblock %}

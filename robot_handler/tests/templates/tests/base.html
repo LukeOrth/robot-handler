@@ -1,0 +1,17 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{% static 'tests/css/style.css' %}">
+    </head>
+    <body>
+        <div id="app"></div>
+
+        {% block content %}{% endblock %}
+
+        <script type="text/javascript" src="{% static 'src/vue/dist/js/chunk-vendors.js' %}"></script>
+        <script type="text/javascript" src="{% static 'src/vue/dist/js/app.js' %}"></script>
+        <script type="text/javascript" src="{% static 'tests/js/table_search.js' %}"></script>
+    </body>
+</html>

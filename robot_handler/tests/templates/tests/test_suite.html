@@ -1,6 +1,6 @@
-{% load static %}
+{% extends "tests/base.html" %}
 
-<link rel="stylesheet" href="{% static 'tests/css/style.css' %}">
+{% block content %}
 
 <h1>{{ test_suite.name }}</h1>
 <table description="test_suites">
@@ -10,8 +10,10 @@
     </tr>
     <tr>
         {% for test_case in test_suite.testcase_set.all %}
-        <td><a href="{% url 'tests:test_case' test_suite.id test_case.id %}">{{ test_case.name }}</a></td>
+        <td><a href="{{ test_case.get_absolute_url }}">{{ test_case.name }}</a></td>
         <td>{{ test_case.documentation|linebreaks }}</td>
     </tr>
 {% endfor %}
 </table>
+
+{% endblock %}
