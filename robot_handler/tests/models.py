@@ -10,8 +10,15 @@ class FileLocations(models.Model):
     def __str__(self):
         return f'name: {self.name}, location: {self.location}'
 
+class TestCategory(models.Model):
+    name = models.CharField(max_length=50, primary_key=True)
+
+    def __str__(self):
+        return self.name
+
 class TestSuite(models.Model):
     name = models.CharField(max_length=200)
+    test_category = models.ForeignKey(TestCategory, blank=True, null=True, on_delete=models.CASCADE)
     documentation = models.TextField(blank=True)
     suite_setup = models.CharField('suite setup', blank=True, max_length=200)
     suite_teardown = models.CharField('suite teardown', blank=True, max_length=200)
@@ -36,7 +43,7 @@ class TestCase(models.Model):
     def __str__(self):
         return self.name
 
-class Tags(models.Model):
+class Tag(models.Model):
     test_suite = models.ForeignKey(TestSuite, blank=True, null=True, on_delete=models.SET_NULL)
     test_case = models.ForeignKey(TestCase, blank=True, null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=50)
@@ -52,14 +59,14 @@ class Metadata(models.Model):
     def __str__(self):
         return self.name
 
-class Libraries(models.Model):
+class Library(models.Model):
     test_suite = models.ForeignKey(TestSuite, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
 
-class Templates(models.Model):
+class Template(models.Model):
     test_case = models.ForeignKey(TestCase, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
 

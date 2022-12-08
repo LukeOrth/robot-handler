@@ -1,6 +1,7 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'tests/style.css' %}">
+<link rel="stylesheet" href="{% static 'tests/css/style.css' %}">
+<script type="text/javascript" src="{% static 'tests/js/table_search.js' %}"></script>
 
 <form action="{% url 'tests:refresh_tests' %}" method="post">
 {{ refresh_tests_form.as_p }}
@@ -17,22 +18,38 @@
 <button type="submit" name='robot_location'>Robot Location</button>
 </form>
 
-<table summary="test_suites">
-    <tr>
-        <th>Test Suite</th>
-        <th>Documentation</th>
-    </tr>
-{% if test_suite_list %}
-    {% for test_suite in test_suite_list %}
-    <tr>
-        <td><a href="{% url 'tests:test_suite' test_suite.id %}">{{ test_suite.name }}</a></td>
-        <td>{{ test_suite.documentation|linebreaks }}</td>
-    {% endfor %}
-    </tr>
-{% else %}
-    <tr>
-        <td>No test suites are available.</td>
-        <td></td>
-    </tr>
-{% endif %}
+<input type="text" id="search-table">
+<table summary="test_suites" class="searchable-table">
+    <thead>
+        <tr>
+            <th>
+                <input type="text" class="search-column" placeholder="Test Suite">
+            </th>
+            <th>
+                <input type="text" class="search-column" placeholder="Documentation">
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if test_category_list %}
+            {% for test_category in test_category_list %}
+                <tr class="{{ test_category|lower }}">
+                    <td>{{ test_category.name }}</td>
+                </tr>
+                {% for test_suite in test_suite_list %}
+                    {% if test_suite.test_category == test_category %}
+                    <tr class="{{ test_category|lower }}">
+                            <td><a href="{% url 'tests:test_suite' test_suite.id %}">{{ test_suite.name }}</a></td>
+                            <td>{{ test_suite.documentation|linebreaks }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td>No test suites are available.</td>
+                <td></td>
+            </tr>
+        {% endif %}
+    </tbody>
 </table>

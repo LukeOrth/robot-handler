@@ -2,14 +2,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RefreshTests, RobotLocation
-from .models import FileLocations, TestSuite, TestCase
+from .models import FileLocations, TestCategory, TestSuite, TestCase
 from .scripts import update_tests, update_robot_dir
 
 def index(request):
-    test_suite_list = TestSuite.objects.order_by('name')
+    test_category_list = TestCategory.objects.order_by('name')
+    test_suite_list = TestSuite.objects.order_by('test_category__name', 'name')
     robot_dir = FileLocations.objects.filter(pk='robot_dir').first()
 
     context = {
+        'test_category_list': test_category_list,
         'robot_dir': robot_dir,
         'test_suite_list': test_suite_list,
     }
@@ -21,7 +23,7 @@ def refresh_tests(request):
     if request.method == 'POST':
         if 'refresh_tests' in request.POST:
             refresh_tests_form = RefreshTests(request.POST)
-            update_tests.run('evan was here')
+            update_tests.run()
             return redirect('tests:index')
         if 'robot_location' in request.POST:
             robot_location_form = RobotLocation(request.POST)

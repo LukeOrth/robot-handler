@@ -1,15 +1,19 @@
-import ast
+import ast, os
 from pathlib import Path
 from pprint import pprint
 from robot.api import get_model
 from robot.parsing.model.blocks import TestCase as TestCaseNode
-from robot.parsing.model.statements import Documentation, ForceTags, LibraryImport, Metadata as MetadataNode, Setup, SuiteSetup, SuiteTeardown, Teardown, Template, TestCaseName, TestSetup, TestTeardown, TestTimeout, Tags as TagsNode, Timeout
-from tests.models import FileLocations, TestSuite, TestCase, Tags, Metadata, Libraries, Templates
+from robot.parsing.model.statements import Documentation, ForceTags, LibraryImport, Metadata as MetadataNode, Setup, SuiteSetup, SuiteTeardown, Teardown, Template as TemplateNode, TestCaseName, TestSetup, TestTeardown, TestTimeout, Tags as TagsNode, Timeout
+from tests.models import FileLocations, TestCategory, TestSuite, TestCase, Tag, Metadata, Library, Template
 
+class TestCategoryPrototype:
+    def __init__(self):
+        self.name = None
 
 class TestSuitePrototype:
     def __init__(self):
         self.name = ''
+        self.test_category = None
         self.documentation = ''
         self.suite_setup = ''
         self.suite_teardown = ''
@@ -29,7 +33,7 @@ class TestCasePrototype:
         self.body = ''
         self.source = ''
 
-class TagsPrototype:
+class TagPrototype:
     def __init__(self):
         self.test_suite = None
         self.test_case = None
@@ -41,20 +45,21 @@ class MetadataPrototype:
         self.name = None
         self.value = None
 
-class LibrariesPrototype:
+class LibraryPrototype:
     def __init__(self):
         self.test_suite = None
         self.name = None
 
-class TemplatesPrototype:
+class TemplatePrototype:
     def __init__(self):
         self.test_case = None
         self.name = None
 
-class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPrototype):
+class RobotParser(ast.NodeVisitor):
 
     def __init__(self):
         self.source = None
+        self.category = None
         self.test_suite = None
         self.test_cases = []
         self.tags = []
@@ -73,6 +78,14 @@ class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPr
         ts.name = Path(self.source).stem
         # TestSuite: Path
         ts.source = self.source
+
+        cat = TestCategoryPrototype()
+
+        # TestCategory
+        path = os.path.dirname(ts.source)
+        cat.name = os.path.basename(path)
+        self.category = cat
+
         for i in ast.iter_child_nodes(node):
             # TestSuite: documentation
             if type(i) == Documentation:
@@ -89,10 +102,10 @@ class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPr
             # TestSuite: suite_teardown
             if type(i) == SuiteTeardown:
                 ts.suite_teardown = i.get_value('NAME')
-            # Tags
+            # Tag
             if type(i) == ForceTags:
                 for tag in i.values:
-                    ts_tags = TagsPrototype()
+                    ts_tags = TagPrototype()
                     ts_tags.test_suite = True
                     ts_tags.name = tag
                     self.tags.append(ts_tags)
@@ -105,9 +118,9 @@ class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPr
             # TestSuite: test_timeout
             if type(i) == TestTimeout:
                 ts.test_timeout = i.value
-            # Libraries
+            # Library
             if type(i) == LibraryImport:
-                lib = LibrariesPrototype()
+                lib = LibraryPrototype()
                 lib.name = i.name
                 self.libraries.append(lib)
         self.test_suite = ts
@@ -124,10 +137,10 @@ class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPr
                     # TestCase: documentation
                     if type(n) == Documentation:
                         tc.documentation = n.value
-                    # Tags
+                    # Tag
                     if type(n) == TagsNode:
                         for tag in n.values:
-                            tc_tags = TagsPrototype()
+                            tc_tags = TagPrototype()
                             tc_tags.test_case = True
                             tc_tags.name = tag
                             self.tags.append(tc_tags)
@@ -137,9 +150,9 @@ class RobotParser(ast.NodeVisitor, TestSuitePrototype, TestCasePrototype, TagsPr
                     # TestCase: teardown
                     if type(n) == Teardown:
                         tc.teardown = n.name
-                    # Templates
-                    if type(n) == Template:
-                        tmp = TemplatesPrototype()
+                    # Template
+                    if type(n) == TemplateNode:
+                        tmp = TemplatePrototype()
                         tmp.name = n.value
                         self.templates.append(tmp)
                     # TestCase: timeout
@@ -162,18 +175,19 @@ def update_tags(tags, fk):
 
 
         
-def run(param="Luke was here"):
+def run():
 
     # Get the "/tests" directory from DB
     tests_dir = FileLocations.objects.filter(pk='tests_dir').first().location
 
     if tests_dir:
-        test_cases = TestCase.objects.all().delete()
-        test_suites = TestSuite.objects.all().delete()
-        tags = Tags.objects.all().delete()
-        metadata = Metadata.objects.all().delete()
-        libraries = Libraries.objects.all().delete()
-        templates = Templates.objects.all().delete()
+        TestCategory.objects.all().delete()
+        TestCase.objects.all().delete()
+        TestSuite.objects.all().delete()
+        Tag.objects.all().delete()
+        Metadata.objects.all().delete()
+        Library.objects.all().delete()
+        Template.objects.all().delete()
         
         p = Path(tests_dir.name)
         for f in p.rglob('*.robot'):
@@ -181,6 +195,10 @@ def run(param="Luke was here"):
             parser = RobotParser()
             parser.visit(model)
 
+            cat = TestCategory(**parser.category.__dict__)
+            cat.save()
+
+            parser.test_suite.test_category = cat
             ts = TestSuite(**parser.test_suite.__dict__)
             ts.save()
 
@@ -193,7 +211,7 @@ def run(param="Luke was here"):
 
             for library in parser.libraries:
                 library.test_suite = ts
-                lib = Libraries(**library.__dict__)
+                lib = Library(**library.__dict__)
                 lib.save()
 
             for test_case in parser.test_cases:
@@ -205,9 +223,9 @@ def run(param="Luke was here"):
 
                 for template in parser.templates:
                     template.test_case = tc
-                    tmp = Templates(**template.__dict__)
+                    tmp = Template(**template.__dict__)
                     tmp.save()
 
             for tag in parser.tags:
-                t = Tags(**tag.__dict__)
+                t = Tag(**tag.__dict__)
                 t.save()
