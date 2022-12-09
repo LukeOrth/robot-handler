@@ -14,5 +14,9 @@ urlpatterns = [
         path('<int:test_suite_id>/<int:test_case_id>/results/', views.test_case_results, name='test_case_results'),
         path('<int:test_suite_id>/<int:test_case_id>/run/', views.test_case_run, name='test_case_run'),
 
-        path('api/v1/test-suites/', views.TestSuitesList.as_view()),
+        path('api/', views.apiOverview, name="api-overview"),
+        path('api/v1/test-suites/', views.testSuitesList, name='test-suites'),
+        path('api/v1/test-suites/<str:pk>/', views.testSuite, name='test-suite'),
+        path('api/v1/test-cases/', views.testCasesList, name='test-cases'),
+        path('api/v1/test-cases/<str:pk>', views.testCase, name='test-case'),
 ]

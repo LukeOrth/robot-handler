@@ -1,19 +1,50 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .forms import RefreshTests, RobotLocation
 from .models import FileLocations, TestCategory, TestSuite, TestCase
 from .scripts import update_tests, update_robot_dir
-from .serializers import TestSuiteSerializer
+from .serializers import TestSuiteSerializer, TestCaseSerializer
 
-class TestSuitesList(APIView):
-    def get(self, request, format=None):
-        test_suites = TestSuite.objects.order_by('test_category__name', 'name')
-        serializer = TestSuiteSerializer(test_suites, many=True)
-        return Response(serializer.data)
+#ENDPOINT: /api
+@api_view(['GET'])
+def apiOverview(request):
+    api_urls = {
+        'TestSuites': '/v1/test-suites',
+    }
+    return Response(api_urls)
+
+#ENDPOINT: /api/v1/test-suites
+@api_view(['GET'])
+def testSuitesList(request):
+    test_suites = TestSuite.objects.order_by('test_category__name', 'name')
+    serializer = TestSuiteSerializer(test_suites, many=True)
+    return Response(serializer.data)
+
+#ENDPOINT: /api/v1/test-suites/<id>
+@api_view(['GET'])
+def testSuite(request, pk):
+    test_suite = TestSuite.objects.get(id=pk)
+    serializer = TestSuiteSerializer(test_suite, many=False)
+    return Response(serializer.data)
+
+#ENDPOINT: /api/v1/test-cases
+@api_view(['GET'])
+def testCasesList(request):
+    test_cases = TestCase.objects.order_by('name')
+    serializer = TestCaseSerializer(test_cases, many=True)
+    return Response(serializer.data)
+
+#ENDPOINT: /api/v1/test-cases/<id>
+@api_view(['GET'])
+def testCase(request, pk):
+    test_case = TestCase.objects.get(id=pk)
+    serializer = TestCaseSerializer(test_case, many=False)
+    return Response(serializer.data)
 
 def index(request):
     test_category_list = TestCategory.objects.order_by('name')
