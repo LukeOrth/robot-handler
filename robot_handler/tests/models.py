@@ -14,9 +14,6 @@ class FileLocations(models.Model):
 class TestCategory(models.Model):
     name = models.CharField(max_length=50, primary_key=True)
 
-    class Meta:
-        ordering = ('name',)
-
     def __str__(self):
         return self.name
 
@@ -30,9 +27,6 @@ class TestSuite(models.Model):
     test_teardown = models.CharField('test teardown', blank=True, max_length=200)
     test_timeout = models.CharField('test timeout', blank=True, max_length=200)
     source = models.FileField()
-
-    class Meta:
-        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -50,9 +44,6 @@ class TestCase(models.Model):
     body = models.TextField(blank=True)
     source = models.FileField()
 
-    class Meta:
-        ordering = ('name',)
-
     def __str__(self):
         return self.name
 
@@ -64,9 +55,6 @@ class Tag(models.Model):
     test_case = models.ForeignKey(TestCase, blank=True, null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=50)
 
-    class Meta:
-        ordering = ('name',)
-
     def __str__(self):
         return self.name
 
@@ -75,9 +63,6 @@ class Metadata(models.Model):
     name = models.CharField(max_length=50)
     value = models.CharField(blank=True, null=True, max_length=50)
 
-    class Meta:
-        ordering = ('name',)
-
     def __str__(self):
         return self.name
 
@@ -85,18 +70,12 @@ class Library(models.Model):
     test_suite = models.ForeignKey(TestSuite, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
 
-    class Meta:
-        ordering = ('name',)
-
     def __str__(self):
         return self.name
 
 class Template(models.Model):
     test_case = models.ForeignKey(TestCase, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-
-    class Meta:
-        ordering = ('name',)
 
     def __str__(self):
         return self.name
