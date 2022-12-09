@@ -1,9 +1,19 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 from .forms import RefreshTests, RobotLocation
 from .models import FileLocations, TestCategory, TestSuite, TestCase
 from .scripts import update_tests, update_robot_dir
+from .serializers import TestSuiteSerializer
+
+class TestSuitesList(APIView):
+    def get(self, request, format=None):
+        test_suites = TestSuite.objects.order_by('test_category__name', 'name')
+        serializer = TestSuiteSerializer(test_suites, many=True)
+        return Response(serializer.data)
 
 def index(request):
     test_category_list = TestCategory.objects.order_by('name')
