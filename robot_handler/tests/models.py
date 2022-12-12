@@ -17,6 +17,31 @@ class TestCategory(models.Model):
     def __str__(self):
         return self.name
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, primary_key=True)
+
+    def __str__(self):
+        return self.name
+
+class Metadata(models.Model):
+    name = models.CharField(max_length=50)
+    value = models.CharField(blank=True, null=True, max_length=50)
+
+    def __str__(self):
+        return self.name
+
+class Library(models.Model):
+    name = models.CharField(max_length=50, primary_key=True)
+
+    def __str__(self):
+        return self.name
+
+class Template(models.Model):
+    name = models.CharField(max_length=50, primary_key=True)
+
+    def __str__(self):
+        return self.name
+
 class TestSuite(models.Model):
     name = models.CharField(max_length=200)
     test_category = models.ForeignKey(TestCategory, blank=True, null=True, on_delete=models.CASCADE)
@@ -26,6 +51,9 @@ class TestSuite(models.Model):
     test_setup = models.CharField('test setup', blank=True, max_length=200)
     test_teardown = models.CharField('test teardown', blank=True, max_length=200)
     test_timeout = models.CharField('test timeout', blank=True, max_length=200)
+    tags = models.ManyToManyField(Tag)
+    metadata = models.ManyToManyField(Metadata)
+    libraries = models.ManyToManyField(Library)
     source = models.FileField()
 
     def __str__(self):
@@ -42,6 +70,8 @@ class TestCase(models.Model):
     teardown = models.CharField(blank=True, max_length=200)
     timeout = models.CharField(blank=True, max_length=200)
     body = models.TextField(blank=True)
+    tags = models.ManyToManyField(Tag)
+    templates = models.ManyToManyField(Template)
     source = models.FileField()
 
     def __str__(self):
@@ -49,33 +79,3 @@ class TestCase(models.Model):
 
     def get_absolute_url(self):
         return reverse('tests:test_case', args=[str(self.test_suite.id), str(self.id)])
-
-class Tag(models.Model):
-    test_suite = models.ForeignKey(TestSuite, blank=True, null=True, on_delete=models.SET_NULL)
-    test_case = models.ForeignKey(TestCase, blank=True, null=True, on_delete=models.SET_NULL)
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
-
-class Metadata(models.Model):
-    test_suite = models.ForeignKey(TestSuite, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-    value = models.CharField(blank=True, null=True, max_length=50)
-
-    def __str__(self):
-        return self.name
-
-class Library(models.Model):
-    test_suite = models.ForeignKey(TestSuite, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
-
-class Template(models.Model):
-    test_case = models.ForeignKey(TestCase, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name

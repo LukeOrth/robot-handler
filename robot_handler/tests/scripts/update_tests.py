@@ -35,24 +35,19 @@ class TestCasePrototype:
 
 class TagPrototype:
     def __init__(self):
-        self.test_suite = None
-        self.test_case = None
         self.name = None
 
 class MetadataPrototype:
     def __init__(self):
-        self.test_suite = None
         self.name = None
         self.value = None
 
 class LibraryPrototype:
     def __init__(self):
-        self.test_suite = None
         self.name = None
 
 class TemplatePrototype:
     def __init__(self):
-        self.test_case = None
         self.name = None
 
 class RobotParser(ast.NodeVisitor):
@@ -62,7 +57,8 @@ class RobotParser(ast.NodeVisitor):
         self.category = None
         self.test_suite = None
         self.test_cases = []
-        self.tags = []
+        self.test_suite_tags = []
+        self.test_case_tags = []
         self.metadata = []
         self.libraries = []
         self.templates = []
@@ -102,13 +98,12 @@ class RobotParser(ast.NodeVisitor):
             # TestSuite: suite_teardown
             if type(i) == SuiteTeardown:
                 ts.suite_teardown = i.get_value('NAME')
-            # Tag
+            # TestSuite: tag
             if type(i) == ForceTags:
                 for tag in i.values:
                     ts_tags = TagPrototype()
-                    ts_tags.test_suite = True
                     ts_tags.name = tag
-                    self.tags.append(ts_tags)
+                    self.test_suite_tags.append(ts_tags)
             # TestSuite: test_setup
             if type(i) == TestSetup:
                 ts.test_setup = i.name
@@ -141,9 +136,8 @@ class RobotParser(ast.NodeVisitor):
                     if type(n) == TagsNode:
                         for tag in n.values:
                             tc_tags = TagPrototype()
-                            tc_tags.test_case = True
                             tc_tags.name = tag
-                            self.tags.append(tc_tags)
+                            self.test_case_tags.append(tc_tags)
                     # TestCase: setup
                     if type(n) == Setup:
                         tc.setup = n.name
@@ -163,18 +157,7 @@ class RobotParser(ast.NodeVisitor):
                         # WILL REVIST THIS
                 self.test_cases.append(tc)
 
-def update_tags(tags, fk):
-    if type(fk) == TestCase:
-        for t in tags:
-            if t.test_case:
-                t.test_case = fk
-    if type(fk) == TestSuite:
-        for t in tags:
-            if t.test_suite:
-                t.test_suite = fk
 
-
-        
 def run():
 
     # Get the "/tests" directory from DB
@@ -199,33 +182,36 @@ def run():
             cat.save()
 
             parser.test_suite.test_category = cat
+
             ts = TestSuite(**parser.test_suite.__dict__)
             ts.save()
 
-            update_tags(parser.tags, ts)
+            for tag in parser.test_suite_tags:
+                t = Tag(**tag.__dict__)
+                t.save()
+                ts.tags.add(t)
 
-            for meta_data in parser.metadata:
-                meta_data.test_suite = ts
-                md = Metadata(**meta_data.__dict__)
+            for metadata in parser.metadata:
+                md = Metadata(**metadata.__dict__)
                 md.save()
+                ts.metadata.add(md)
 
             for library in parser.libraries:
-                library.test_suite = ts
                 lib = Library(**library.__dict__)
                 lib.save()
+                ts.libraries.add(lib)
 
             for test_case in parser.test_cases:
                 test_case.test_suite = ts
                 tc = TestCase(**test_case.__dict__)
                 tc.save()
 
-                update_tags(parser.tags, tc)
+                for tag in parser.test_case_tags:
+                    t = Tag(**tag.__dict__)
+                    t.save()
+                    tc.tags.add(t)
 
                 for template in parser.templates:
-                    template.test_case = tc
                     tmp = Template(**template.__dict__)
                     tmp.save()
-
-            for tag in parser.tags:
-                t = Tag(**tag.__dict__)
-                t.save()
+                    tc.templates.add(tmp)
