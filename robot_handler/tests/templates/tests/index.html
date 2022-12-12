@@ -2,6 +2,34 @@
 
 {% block content %}
 
+<div class="container-fluid">
+    <div class="row mt-2 g-2 row-cols-auto">
+        <div class="col">
+            <form action="{% url 'tests:refresh_tests' %}" method="post">
+                {{ refresh_tests_form.as_p }}
+                {% csrf_token %}
+                <button type="submit" name='refresh_tests' class="btn btn-primary">Refresh Tests</button>
+            </form>
+        </div>
+        <div class="col">
+            <form action="{% url 'tests:refresh_tests' %}" method="post">
+                {{ robot_location_form }}
+                {% csrf_token %}
+                <button type="submit" name="robot_location" class="btn btn-outline-secondary">Project Directory</button>
+            </form>
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" id="inputGroupFile04" placeholder="Robot project directory..." value="{{ robot_dir.location }}" readonly>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col">
+            <input type="text" class="form-control" id="search-table" placeholder="Search..." aria-label="Search..." aria-describedby="basic-addon1">
+        </div>
+    </div>
+</div>
+
 <!-- <div class="container-fluid px-0">
     <div class="row mt-2">
         <div class="col">

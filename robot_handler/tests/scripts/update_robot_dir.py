@@ -12,8 +12,6 @@ def get_tests_dir(rootdir):
         for s in subfolders:
             if s.endswith("tests"):
                 return os.path.join(folder, s)
-
-    return None
  
 def run():
 
@@ -23,11 +21,13 @@ def run():
     dir_selected = filedialog.askdirectory()
 
     if dir_selected:
-        tests_dir = get_tests_dir(dir_selected)
-        if tests_dir:
-            # Update robot_dir in DB
-            FileLocations.objects.filter(pk='robot_dir').update(location=dir_selected)
-            # Get the robot_dir from DB
-            robot_dir = FileLocations.objects.filter(pk='robot_dir').first().location.name
-            # Update tests_dir in DB
+        # Update robot_dir in DB
+        FileLocations.objects.filter(pk='robot_dir').update(location=dir_selected)
+        # Get the robot_dir from DB
+        robot_dir = FileLocations.objects.filter(pk='robot_dir').first().location.name
+        
+        if robot_dir:
+            # Search robot_dir on file system to find tests_dir
+            tests_dir = get_tests_dir(robot_dir)
+            # Update test_dir in DB
             FileLocations.objects.filter(pk='tests_dir').update(location=tests_dir)
