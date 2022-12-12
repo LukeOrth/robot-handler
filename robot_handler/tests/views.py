@@ -6,9 +6,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .forms import RefreshTests, RobotLocation
-from .models import FileLocations, TestCategory, TestSuite, TestCase
+from .models import FileLocations, TestCategory, TestSuite, TestCase, Tag
 from .scripts import update_tests, update_robot_dir
-from .serializers import TestSuiteSerializer, TestCaseSerializer
+from .serializers import TestSuiteSerializer, TestCaseSerializer, TagsSerializer
 
 #ENDPOINT: /api
 @api_view(['GET'])
@@ -44,6 +44,12 @@ def testCasesList(request):
 def testCase(request, pk):
     test_case = TestCase.objects.get(id=pk)
     serializer = TestCaseSerializer(test_case, many=False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def tagsList(request):
+    tags = Tag.objects.order_by('name')
+    serializer = TagsSerializer(tags, many=True)
     return Response(serializer.data)
 
 def index(request):

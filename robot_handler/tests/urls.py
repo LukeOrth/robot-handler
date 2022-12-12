@@ -19,4 +19,5 @@ urlpatterns = [
         path('api/v1/test-suites/<str:pk>/', views.testSuite, name='test-suite'),
         path('api/v1/test-cases/', views.testCasesList, name='test-cases'),
         path('api/v1/test-cases/<str:pk>', views.testCase, name='test-case'),
+        path('api/v1/tags/', views.tagsList, name='tags'),
 ]
