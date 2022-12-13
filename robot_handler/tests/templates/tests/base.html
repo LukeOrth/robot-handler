@@ -38,7 +38,11 @@
                     <form action="{% url 'tests:refresh_tests' %}" method="post">
                         {{ refresh_tests_form.as_p }}
                         {% csrf_token %}
-                        <button type="submit" name='refresh_tests' class="btn btn-primary">Refresh Tests</button>
+                        <button type="submit" name='refresh_tests' class="btn btn-primary" id="refresh_tests">Refresh Tests</button>
+                        <button class="d-none btn btn-primary" type="button" id="loading_tests" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Loading...</span>
+                        </button>
                     </form>
                 </div>
             </div>
@@ -50,5 +54,15 @@
         <script type="text/javascript" src="{% static 'src/vue/dist/js/chunk-vendors.js' %}"></script>
         <script type="text/javascript" src="{% static 'src/vue/dist/js/app.js' %}"></script>
         <script type="text/javascript" src="{% static 'tests/js/table_search.js' %}"></script>
+        <script>
+            const refreshBtn = document.getElementById("refresh_tests");
+            const loadingBtn = document.getElementById("loading_tests");
+            if (refreshBtn && loadingBtn) {
+                refreshBtn.onclick = function() {
+                    refreshBtn.classList.toggle("d-none");
+                    loadingBtn.classList.toggle("d-none");
+                };
+            }
+        </script>
     </body>
 </html>

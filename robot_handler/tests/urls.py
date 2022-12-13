@@ -17,13 +17,15 @@ urlpatterns = [
         path('<int:test_suite_id>/<int:test_case_id>/run/', views.test_case_run, name='test_case_run'),
 
         path('api/', views.apiOverview, name="api-overview"),
+        path('api/v1/tests-update/', views.testsUpdate, name="tests-update"),
         path('api/v1/test-suites/', views.testSuitesList, name='test-suites'),
         path('api/v1/test-suites/<str:pk>/', views.testSuite, name='test-suite'),
         path('api/v1/test-cases/', views.testCasesList, name='test-cases'),
         path('api/v1/test-cases/<str:pk>', views.testCase, name='test-case'),
         path('api/v1/tags/', views.tagsList, name='tags'),
+        re_path(r'^api.*$', views.ServiceUnavailable, name='error'),
 
         path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url("tests/images/robotframework.svg"))),
 
-        re_path(r'^.*$', views.index, name='luke'),
+        re_path(r'^.*$', views.index, name='home'),
 ]

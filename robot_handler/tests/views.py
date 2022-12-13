@@ -4,11 +4,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
+
 
 from .forms import RefreshTests, RobotLocation
 from .models import FileLocations, TestCategory, TestSuite, TestCase, Tag
 from .scripts import update_tests, update_robot_dir
-from .serializers import TestSuiteSerializer, TestCaseSerializer, TagsSerializer
+from .serializers import FileLocationsSerializer, TestSuiteSerializer, TestCaseSerializer, TagsSerializer
 
 #ENDPOINT: /api
 @api_view(['GET'])
@@ -46,11 +48,31 @@ def testCase(request, pk):
     serializer = TestCaseSerializer(test_case, many=False)
     return Response(serializer.data)
 
+#ENDPOINT: /api/v1/tags/
 @api_view(['GET'])
 def tagsList(request):
     tags = Tag.objects.order_by('name')
     serializer = TagsSerializer(tags, many=True)
     return Response(serializer.data)
+
+#ENDPOINT: /api/v1/tests-update/
+@api_view(['POST'])
+def testsUpdate(request):
+    serializer = self.FileLocationsSerializer(data=request.data)
+    print(serializer)
+    # if serializer.is_valid():
+    #     name = serializer.data.name
+    #     location = serializer.data.location
+
+    #     if name == 'robot_dir':
+    #         robot_dir = FileLocations.objects.filter(pk='robot_dir').first().location.name
+
+    #     if name = 'tests_dir':
+    #         tests_dir = FileLocations.objects.filter(pk='tests_dir').first().location.name
+        
+
+class ServiceUnavailable(APIException):
+    status_code = 404
 
 def index(request):
     test_category_list = TestCategory.objects.order_by('name')
