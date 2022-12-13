@@ -1,4 +1,6 @@
-from django.urls import path, include
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.urls import path, include, re_path
+from django.views.generic.base import RedirectView
 
 from . import views
 
@@ -20,4 +22,8 @@ urlpatterns = [
         path('api/v1/test-cases/', views.testCasesList, name='test-cases'),
         path('api/v1/test-cases/<str:pk>', views.testCase, name='test-case'),
         path('api/v1/tags/', views.tagsList, name='tags'),
+
+        path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url("tests/images/robotframework.svg"))),
+
+        re_path(r'^.*$', views.index, name='luke'),
 ]

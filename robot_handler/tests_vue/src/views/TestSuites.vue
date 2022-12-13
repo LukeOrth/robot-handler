@@ -32,7 +32,7 @@ import axios from 'axios';
 //import { VueGoodTable } from 'vue-good-table-next';
 
 export default {
-    name: 'TestsHome',
+    name: 'TestSuites',
     data() {
         return {
             testSuites: []

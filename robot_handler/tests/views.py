@@ -74,17 +74,16 @@ def refresh_tests(request):
         if 'refresh_tests' in request.POST:
             refresh_tests_form = RefreshTests(request.POST)
             update_tests.run()
-            return redirect('tests:index')
+            return redirect(request.META.get('HTTP_REFERER'))
         if 'robot_location' in request.POST:
             robot_location_form = RobotLocation(request.POST)
             update_robot_dir.run()
-            return redirect('tests:index')
+            return redirect(request.META.get('HTTP_REFERER'))
     context = {
         'refresh_tests_form': refresh_tests_form,
         'robot_location_form': robot_location_form,
     }
-
-    return render(request, 'tests/index.html', context=context)
+    return render(request, request.META.get('HTTP_REFERER'), context=context)
 
 def test_suite(request, test_suite_id):
     test_suite = get_object_or_404(TestSuite, pk=test_suite_id)
