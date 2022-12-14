@@ -2,7 +2,7 @@ import os
 from django.shortcuts import get_object_or_404
 from pathlib import Path
 from tkinter import filedialog, Tk
-from tests.models import FileLocations
+from tests.models import Setting
 
 
 # Function for finding the "/tests" directory in robot project
@@ -26,8 +26,8 @@ def run():
         tests_dir = get_tests_dir(dir_selected)
         if tests_dir:
             # Update robot_dir in DB
-            FileLocations.objects.filter(pk='robot_dir').update(location=dir_selected)
+            Setting.objects.filter(pk='robot_dir').update(value=dir_selected)
             # Get the robot_dir from DB
-            robot_dir = FileLocations.objects.filter(pk='robot_dir').first().location.name
+            robot_dir = Setting.objects.filter(pk='robot_dir').first().value
             # Update tests_dir in DB
-            FileLocations.objects.filter(pk='tests_dir').update(location=tests_dir)
+            Setting.objects.filter(pk='tests_dir').update(value=tests_dir)

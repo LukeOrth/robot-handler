@@ -4,9 +4,9 @@ from django.db import models
 from django.urls import reverse 
 
 
-class FileLocations(models.Model):
+class Setting(models.Model):
     name = models.CharField(max_length=50, primary_key=True)
-    location = models.FileField()
+    value = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name

@@ -1,75 +1,144 @@
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
+from pathlib import Path
+import json
 
 from .forms import RefreshTests, RobotLocation
-from .models import FileLocations, TestCategory, TestSuite, TestCase, Tag
+from .models import Setting, TestCategory, TestSuite, TestCase, Tag
 from .scripts import update_tests, update_robot_dir
-from .serializers import FileLocationsSerializer, TestSuiteSerializer, TestCaseSerializer, TagsSerializer
+from .serializers import SettingSerializer, TestSuiteSerializer, TestCaseSerializer, TagsSerializer
 
 #ENDPOINT: /api
-@api_view(['GET'])
-def apiOverview(request):
-    api_urls = {
-        'TestSuites': '/v1/test-suites',
-    }
-    return Response(api_urls)
+class ApiOverview(APIView):
+    # ENDPOINTS:
+    #   /api/
+    
+    def get(self, request, format=None):
+        api_urls = {
+            'Test Suites': '/v1/test-suites',
+            'Test Suite': '/v1/test-suites/<id>',
+            'Test Cases': '/v1/test-cases',
+            'Test Case': '/v1/test-cases/<id>',
+        }
 
-#ENDPOINT: /api/v1/test-suites
-@api_view(['GET'])
-def testSuitesList(request):
-    test_suites = TestSuite.objects.order_by('test_category__name', 'name')
-    serializer = TestSuiteSerializer(test_suites, many=True)
-    return Response(serializer.data)
+        return Response(api_urls)
 
-#ENDPOINT: /api/v1/test-suites/<id>
-@api_view(['GET'])
-def testSuite(request, pk):
-    test_suite = TestSuite.objects.get(id=pk)
-    serializer = TestSuiteSerializer(test_suite, many=False)
-    return Response(serializer.data)
+class TestSuites(APIView):
+    # ENDPOINTS: 
+    #   /api/v1/test-suites/
+    #   /api/v1/test-suites/<id>
 
-#ENDPOINT: /api/v1/test-cases
-@api_view(['GET'])
-def testCasesList(request):
-    test_cases = TestCase.objects.order_by('name')
-    serializer = TestCaseSerializer(test_cases, many=True)
-    return Response(serializer.data)
+    def get_queryset(self):
+        test_suites = TestSuite.objects.order_by('test_category__name', 'name')
 
-#ENDPOINT: /api/v1/test-cases/<id>
-@api_view(['GET'])
-def testCase(request, pk):
-    test_case = TestCase.objects.get(id=pk)
-    serializer = TestCaseSerializer(test_case, many=False)
-    return Response(serializer.data)
-
-#ENDPOINT: /api/v1/tags/
-@api_view(['GET'])
-def tagsList(request):
-    tags = Tag.objects.order_by('name')
-    serializer = TagsSerializer(tags, many=True)
-    return Response(serializer.data)
-
-#ENDPOINT: /api/v1/tests-update/
-@api_view(['POST'])
-def testsUpdate(request):
-    serializer = self.FileLocationsSerializer(data=request.data)
-    print(serializer)
-    # if serializer.is_valid():
-    #     name = serializer.data.name
-    #     location = serializer.data.location
-
-    #     if name == 'robot_dir':
-    #         robot_dir = FileLocations.objects.filter(pk='robot_dir').first().location.name
-
-    #     if name = 'tests_dir':
-    #         tests_dir = FileLocations.objects.filter(pk='tests_dir').first().location.name
+        return test_suites
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            id = kwargs["id"]
+            if id:
+                test_suite = TestSuite.objects.get(id=id)
+                serializer = TestSuiteSerializer(test_suite)
+        except:
+            test_suites = self.get_queryset()
+            serializer = TestSuiteSerializer(test_suites, many=True)
         
+        return Response(serializer.data)
+
+class TestCases(APIView):
+    # ENDPOINTS:
+    #   /api/v1/test-cases/
+    #   /api/v1/test-cases/<id>
+
+    def get_queryset(self):
+        test_cases = TestCase.objects.order_by('name')
+
+        return test_cases
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            id = kwargs["id"]
+            if id:
+                test_case = TestCase.objects.get(id=id)
+                serializer = TestCaseSerializer(test_case)
+        except:
+            test_cases = self.get_queryset()
+            serializer = TestCaseSerializer(test_cases, many=True)
+
+        return Response(serializer.data)
+
+class Tags(APIView):
+    # ENDPOINTS:
+    #   /api/v1/tags/
+    #   /api/v1/tags/<id>
+
+    def get_queryset(self):
+        tags = Tag.objects.order_by('name')
+
+        return tags
+
+    def get(self, request, *args, **kwargs):
+        try:
+            name = kwargs["name"]
+            if name:
+                tag = Tag.objects.get(name=name)
+                serializer = TagsSerializer(tag)
+        except:
+            tags = self.get_queryset()
+            serializer = TagsSerializer(tags, many=True)
+
+        return Response(serializer.data)
+
+class Settings(APIView):
+    # ENDPOINTS:
+    #   /api/v1/settings/
+    #   /api/v1/settings/?name=<name>
+
+    def get_queryset(self):
+        setting_values = Setting.objects.order_by('name')
+
+        return setting_values
+
+    def get(self, request, *args, **kwargs):
+        try:
+            name = request.query_params["name"]
+            if name:
+                setting_value = Setting.objects.get(name=name)
+                serializer = SettingSerializer(setting_value)
+        except:
+            setting_values = self.get_queryset()
+            print(setting_values)
+            serializer = SettingSerializer(setting_values, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = SettingSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                setting = Setting.objects.get(name=serializer.data['name'])
+                setting.value = serializer.data['value']
+                setting.save()
+
+                return Response(SettingSerializer(setting).data, status=status.HTTP_201_CREATED)
+            except:
+                return Response(data={'name': ["Couldn't find a setting with this name."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateTests(APIView):
+    # ENDPOINTS:
+    #   /api/v1/update-tests/
+
+    def post(self, request, format=None):
+        return Response(request.data)     
 
 class ServiceUnavailable(APIException):
     status_code = 404
@@ -77,7 +146,7 @@ class ServiceUnavailable(APIException):
 def index(request):
     test_category_list = TestCategory.objects.order_by('name')
     test_suite_list = TestSuite.objects.order_by('test_category__name', 'name')
-    robot_dir = FileLocations.objects.filter(pk='robot_dir').first()
+    robot_dir = Setting.objects.filter(pk='robot_dir').first()
 
     context = {
         'test_category_list': test_category_list,

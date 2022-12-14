@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import FileLocations, TestCategory, Tag, Metadata, Library, Template, TestSuite, TestCase
+from .models import Setting, TestCategory, Tag, Metadata, Library, Template, TestSuite, TestCase
 
 class TestCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,7 +46,11 @@ class TestCaseSerializer(serializers.ModelSerializer):
         model = TestCase
         fields = '__all__'
 
-class FileLocationsSerializer(serializers.ModelSerializer):
+class SettingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FileLocations
-        fields = ['__all__']
+        model = Setting
+        fields = '__all__'
+        extra_kwargs = {
+            'id': {'read_only': False},
+            'name': {'validators': []},
+        }

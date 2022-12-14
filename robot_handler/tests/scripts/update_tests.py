@@ -4,7 +4,7 @@ from pprint import pprint
 from robot.api import get_model
 from robot.parsing.model.blocks import TestCase as TestCaseNode
 from robot.parsing.model.statements import Documentation, ForceTags, LibraryImport, Metadata as MetadataNode, Setup, SuiteSetup, SuiteTeardown, Teardown, Template as TemplateNode, TestCaseName, TestSetup, TestTeardown, TestTimeout, Tags as TagsNode, Timeout
-from tests.models import FileLocations, TestCategory, TestSuite, TestCase, Tag, Metadata, Library, Template
+from tests.models import Setting, TestCategory, TestSuite, TestCase, Tag, Metadata, Library, Template
 
 class TestCategoryPrototype:
     def __init__(self):
@@ -161,7 +161,7 @@ class RobotParser(ast.NodeVisitor):
 def run():
 
     # Get the "/tests" directory from DB
-    tests_dir = FileLocations.objects.filter(pk='tests_dir').first().location
+    tests_dir = Setting.objects.filter(pk='tests_dir').first().value
 
     if tests_dir:
         TestCategory.objects.all().delete()
@@ -172,7 +172,7 @@ def run():
         Library.objects.all().delete()
         Template.objects.all().delete()
         
-        p = Path(tests_dir.name)
+        p = Path(tests_dir)
         for f in p.rglob('*.robot'):
             model = get_model(f)
             parser = RobotParser()
