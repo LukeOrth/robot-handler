@@ -26,6 +26,11 @@ class ApiOverview(APIView):
             'Test Suite': '/v1/test-suites/<id>',
             'Test Cases': '/v1/test-cases',
             'Test Case': '/v1/test-cases/<id>',
+            'Tags': '/v1/tags/',
+            'Tag': '/v1/tag/<name>',
+            'Settings': '/v1/settings/',
+            'Setting': '/v1/settings/?name=<name>',
+            'Update Tests': '/v1/update-tests/'
         }
 
         return Response(api_urls)
@@ -129,7 +134,9 @@ class Settings(APIView):
 
                 return Response(SettingSerializer(setting).data, status=status.HTTP_201_CREATED)
             except:
-                return Response(data={'name': ["Couldn't find a setting with this name."]}, status=status.HTTP_400_BAD_REQUEST)
+                response = {'name': ["Couldn't find a setting with this name."]}
+
+                return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -138,7 +145,15 @@ class UpdateTests(APIView):
     #   /api/v1/update-tests/
 
     def post(self, request, format=None):
-        return Response(request.data)     
+        tests_dir = Setting.objects.filter(pk='tests_dir').first().value
+        if tests_dir:
+            update_tests.run(tests_dir)
+            
+            return Response(request.data)
+        else:
+            error = {'error': "No 'tests_dir' found in settings.  Unable to update tests."}
+
+            return Response(data=error, status=status.HTTP_400_BAD_REQUEST)
 
 class ServiceUnavailable(APIException):
     status_code = 404
