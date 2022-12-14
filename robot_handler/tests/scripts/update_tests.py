@@ -159,9 +159,6 @@ class RobotParser(ast.NodeVisitor):
 
 
 def run(tests_dir):
-    # Get the "/tests" directory from DB
-    tests_dir = Setting.objects.filter(pk='tests_dir').first().value
-
     if tests_dir:
         TestCategory.objects.all().delete()
         TestCase.objects.all().delete()
@@ -214,5 +211,3 @@ def run(tests_dir):
                     tmp = Template(**template.__dict__)
                     tmp.save()
                     tc.templates.add(tmp)
-    else:
-        return "No 'tests_dir' found in settings.  Unable to update tests."
