@@ -23,7 +23,7 @@ const routes = [
         path: "/test-cases",
         name: "TestCases",
         component: TestCases,
-    }
+    },
 ]
 
 const router = createRouter({

@@ -62,7 +62,7 @@ export default {
     components: {
     },
     setup() {
-        // Create data /vars
+        // Create data/vars
         const data = ref([]);
         const dataLoaded = ref(null);
         const noData = ref(null);

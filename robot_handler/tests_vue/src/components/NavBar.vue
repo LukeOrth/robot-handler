@@ -22,7 +22,8 @@
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">Settings</a>
+                    <SettingsModal />
+                    <a class="nav-link" @click="showHideModal" aria-current="page" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">Settings</a>
                 </li>
             </ul>
         </div>
@@ -32,8 +33,31 @@
 </template>
 
 <script>
-export default {
+import { ref } from "vue";
+import SettingsModal from './SettingsModal.vue';
+import * as bootstrap from "bootstrap";
 
+export default {
+    components: {
+        SettingsModal
+    },
+    setup() {
+        // Create data/vars
+        const show = ref(false);
+        
+        // Define showHideModal func
+        const showHideModal = () => {
+            let modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('settingsModal')) // Returns a Bootstrap modal instance
+
+            if (show.value) {
+                modal.hide();
+            } else {
+                modal.show();
+            }
+        };
+
+        return { showHideModal };
+    },
 }
 </script>
 
