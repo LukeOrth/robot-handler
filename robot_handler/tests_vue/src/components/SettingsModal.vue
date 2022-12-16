@@ -12,45 +12,17 @@
                         <div class="row mt-2 g-2 row-cols-auto">
                             <div class="input-group mb-3">
                                 <span class="input-group-text" style="width: 150px;">Project Directory</span>
-                                <input type="text" class="form-control" placeholder="Project directory..." aria-label="Project directory..." aria-describedby="button-addon2" value="{{ robot_dir.value }}">
-                                <button 
-                                    @click="toggle" 
-                                    :class="[!hideLoading ? 'd-none' : '']"
-                                    type="submit" class="btn btn-outline-primary w-25" id="update_project_dir"
-                                    >Update
-                                </button>
+                                <input v-model="projectDir" type="text" class="form-control w-50" placeholder="Project directory..." aria-label="Project directory..." aria-describedby="button-addon2">
+                                <SpinnerButton :key="projectDirReload" @request.once="updateProjectDir(projectDir)" />
+
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text" style="width: 150px;">Test Directory</span>
-                                <input type="text" class="form-control" placeholder="Test directory..." aria-label="Test directory..." aria-describedby="button-addon2" value="{{ robot_dir.value }}">
-                                <button 
-                                    @click="toggle" 
-                                    :class="[!hideLoading ? 'd-none' : '']"
-                                    type="submit" class="btn btn-outline-primary w-25" id="update_tests_dir"
-                                    >Update
-                                </button>
+                                <input v-model="testsDir" type="text" class="form-control w-50" placeholder="Test directory..." aria-label="Test directory..." aria-describedby="button-addon2">
+                                <SpinnerButton :key="testsDirReload" @request.once="updateTestsDir(testsDir)" />
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form>
-                        <button 
-                            @click="toggle" 
-                            :class="[!hideLoading ? 'd-none' : '']"
-                            type="submit" class="btn btn-primary" id="refresh_tests"
-                            >Refresh Tests
-                        </button>
-                        <button 
-                            @click="toggle" 
-                            :class="[hideLoading ? 'd-none' : '']" 
-                            class="btn btn-primary" type="button" id="loading_tests" disabled
-                            >
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span> Loading...</span>
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
@@ -60,21 +32,40 @@
 
 <script>
 import { ref } from "vue";
+import SpinnerButton from "./SpinnerButton.vue";
+import store from "../store/index";
 
 export default {
     components: {
-
+        SpinnerButton,
     },
     setup() {
-        // Create data/vars
-        const hideLoading = ref(true);
-        
-        // Define toggle func
-        const toggle = () => {
-            hideLoading.value = !hideLoading.value;
+        const projectDir = ref(store.state.projectDir);
+        const testsDir = ref(store.state.testsDir);
+        const projectDirReload = ref(0);
+        const testsDirReload = ref(0);
+
+        const forceRerender = (spinner) => {
+            spinner.value += 1;
         };
 
-        return { toggle, hideLoading };
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+
+        const updateProjectDir = async(input) => {
+            console.log(input)
+            store.methods.setProjectDir(input)
+            await delay(5000);
+            forceRerender(projectDirReload);
+        }
+
+        const updateTestsDir = async(input) => {
+            console.log(input)
+            store.methods.setTestsDir(input)
+            await delay(5000);
+            forceRerender(testsDirReload);
+        }
+
+        return { projectDir, testsDir, updateProjectDir, updateTestsDir, projectDirReload, testsDirReload };
     },
 }
 </script>
