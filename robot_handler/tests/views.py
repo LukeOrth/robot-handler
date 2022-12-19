@@ -147,9 +147,9 @@ class UpdateTests(APIView):
     def post(self, request, format=None):
         tests_dir = Setting.objects.filter(pk='tests_dir').first().value
         if tests_dir:
-            update_tests.run(tests_dir)
+            results = update_tests.run(tests_dir)
             
-            return Response(request.data)
+            return Response(results)
         else:
             error = {'error': "No 'tests_dir' found in settings.  Unable to update tests."}
 

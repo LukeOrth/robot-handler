@@ -2,13 +2,13 @@
     <button 
         @click="toggle(); $emit('request');" 
         :class="[!hideLoading ? 'd-none' : '']"
-        type="submit" class="btn btn-outline-primary w-25"
+        type="submit" class="btn btn-outline-primary"
         >
         <slot>Update</slot>
     </button>
     <button
         :class="[hideLoading ? 'd-none' : '']" 
-        type="submit" class="btn btn-outline-primary w-25" disabled
+        type="submit" class="btn btn-outline-primary" disabled
         >
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span> Loading...</span>

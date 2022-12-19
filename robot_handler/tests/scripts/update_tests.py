@@ -169,6 +169,12 @@ def run(tests_dir):
         Template.objects.all().delete()
         
         p = Path(tests_dir)
+
+        results = {
+            'test_suites': 0,
+            'test_cases': 0,
+        }
+
         for f in p.rglob('*.robot'):
             model = get_model(f)
             parser = RobotParser()
@@ -181,6 +187,7 @@ def run(tests_dir):
 
             ts = TestSuite(**parser.test_suite.__dict__)
             ts.save()
+            results['test_suites'] += 1
 
             for tag in parser.test_suite_tags:
                 t = Tag(**tag.__dict__)
@@ -201,6 +208,7 @@ def run(tests_dir):
                 test_case.test_suite = ts
                 tc = TestCase(**test_case.__dict__)
                 tc.save()
+                results['test_cases'] += 1
 
                 for tag in parser.test_case_tags:
                     t = Tag(**tag.__dict__)
@@ -211,3 +219,5 @@ def run(tests_dir):
                     tmp = Template(**template.__dict__)
                     tmp.save()
                     tc.templates.add(tmp)
+
+    return results
