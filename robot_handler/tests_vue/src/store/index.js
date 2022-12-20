@@ -3,7 +3,10 @@ import { reactive } from "vue";
 const state = reactive({
     projectDir: null,
     testsDir: null,
-    testSuite: null,
+
+    testCategories: null,
+    testSuites: null,
+    testCases: null,
 });
 
 const methods = {
@@ -12,6 +15,16 @@ const methods = {
     },
     setTestsDir(payload) {
         state.testsDir = payload ? payload : null;
+    },
+
+    setTestCategories(payload) {
+        state.testCategories = payload ? payload : null;
+    },
+    setTestSuites(payload) {
+        state.testCategories = payload ? payload : null;
+    },
+    setTestCases(payload) {
+        state.testCategories = payload ? payload : null;
     },
 }
 

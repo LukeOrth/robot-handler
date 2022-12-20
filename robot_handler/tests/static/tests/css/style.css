@@ -1,4 +1,38 @@
-th input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+th input::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: #d3d3d3 !important;
 }
-  
+
+.accordion-button {
+  background-color: var(--bs-gray-100) !important;
+}
+
+.hide {
+  display: none;
+  position: absolute;
+  left: 85%;
+  overflow: visible;
+  background-color: var(--bs-border-color);
+}
+
+.test-case-item {
+  white-space:nowrap;
+  overflow: hidden;
+  position: relative;
+}
+
+.list-group-item:hover {
+  background-color: var(--bs-border-color);
+}
+
+.list-group-item:hover .test-case-item {
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 60%, rgba(0,0,0,0));
+}
+
+.list-group-item:hover .hide {
+  display: inline-block;
+}
+
+.hide svg:hover path {
+  fill: #04c70d;
+}

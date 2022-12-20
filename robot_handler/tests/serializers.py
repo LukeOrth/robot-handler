@@ -33,14 +33,20 @@ class TestSuiteSerializer(serializers.ModelSerializer):
     metadata = MetadataSerializer(many=True)
     libraries = LibrarySerializer(many=True)
 
+    test_cases = serializers.SerializerMethodField()
+
+    def get_test_cases(self, test_suite):
+        queryset = TestCase.objects.filter(test_suite_id=test_suite.id)
+
+        return TestCaseSerializer(queryset, many=True).data
+
     class Meta:
         model = TestSuite
-        fields = '__all__'
+        fields = ('id', 'test_category', 'tags', 'metadata', 'libraries', 'name', 'documentation', 'suite_setup', 'suite_teardown', 'test_setup', 'test_teardown', 'test_timeout', 'source', 'test_cases')
 
 class TestCaseSerializer(serializers.ModelSerializer):
     tags = TagsSerializer(many=True)
     templates = TemplateSerializer(many=True)
-    test_suite = TestSuiteSerializer(many=False)
 
     class Meta:
         model = TestCase
