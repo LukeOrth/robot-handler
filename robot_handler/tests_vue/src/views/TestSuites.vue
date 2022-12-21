@@ -4,6 +4,8 @@
             <div class="col">
 
                 <!-- Data -->
+                <TestCaseModalVue :tcID="testCaseId" />
+                <TestSuiteModalVue :tsID="testSuiteId" />
 
                 <div v-if="dataLoaded" class="accordion accordion-flush" id="accordionFlushExample">
 
@@ -22,23 +24,52 @@
                                     <div v-for="test_suite in test_category.test_suites" v-bind:key="test_suite.id"
                                         class="col">
                                         <div class="card">
-                                            <div class="card-header">
+                                            <div @click="loadTestSuiteModal(test_suite.id)"
+                                                class="card-header clickable-list-item" data-bs-toggle="modal"
+                                                data-bs-target="#testSuiteModal">
                                                 <span class="lh-lg">
-                                                    {{ test_suite.name}}
+                                                    {{ test_suite.name }}
                                                 </span>
                                                 <span class="actions hide">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="#15be00" d="M8 19V5l11 7Z"/></svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em"
+                                                        viewBox="0 0 24 24">
+                                                        <path fill="#15be00" d="M8 19V5l11 7Z" />
+                                                    </svg>
                                                 </span>
                                             </div>
                                             <ul class="list-group list-group-flush">
-                                                <li v-for="test_case in test_suite.test_cases" v-bind:key="test_case.id" class="list-group-item">
-                                                    <div style="width: 100%;" class="lh-lg float-start test-case-item">{{ test_case.name }}</div>
+                                                <li v-for="test_case in test_suite.test_cases" v-bind:key="test_case.id"
+                                                    :id="test_case.id" @click="loadTestCaseModal(test_case.id)"
+                                                    class="list-group-item clickable-list-item" data-bs-toggle="modal"
+                                                    data-bs-target="#testCaseModal"
+                                                    :data-bs-test-case="`${test_case.id}`">
+                                                    <div style="width: 100%;" class="lh-lg float-start test-case-item">
+                                                        {{ test_case.name }}</div>
                                                     <div class="actions hide float-start">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"/></svg>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M9.525 18.025q-.5.325-1.013.037Q8 17.775 8 17.175V6.825q0-.6.512-.888q.513-.287 1.013.038l8.15 5.175q.45.3.45.85t-.45.85Z"/></svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em"
+                                                            preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24">
+                                                            <path fill="currentColor"
+                                                                d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em"
+                                                            preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24">
+                                                            <path fill="currentColor"
+                                                                d="M9.525 18.025q-.5.325-1.013.037Q8 17.775 8 17.175V6.825q0-.6.512-.888q.513-.287 1.013.038l8.15 5.175q.45.3.45.85t-.45.85Z" />
+                                                        </svg>
                                                     </div>
+                                                    <p v-for="tag in test_case.tags" v-bind:key="tag"
+                                                        class="float-start me-2 mb-1">
+                                                        <span class="badge text-bg-warning">{{ tag.name }}</span>
+                                                    </p>
                                                 </li>
                                             </ul>
+                                            <div class="card-footer">
+                                                <small v-for="tag in test_suite.tags" v-bind:key="tag"
+                                                    class="float-end me-2">
+                                                    <span class="badge text-bg-primary">{{ tag.name }}</span>
+                                                </small>
+                                                <small class="float-end me-2">Tags: </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -66,6 +97,8 @@ import { ref } from "vue";
 import NoDataVue from '@/components/NoData.vue';
 import LoadingDataVue from '@/components/LoadingData.vue';
 import ErrorDataVue from '@/components/ErrorData.vue';
+import TestCaseModalVue from '@/components/TestCaseModal.vue';
+import TestSuiteModalVue from '@/components/TestSuiteModal.vue';
 import store from "../store/index.js"
 
 export default {
@@ -74,6 +107,8 @@ export default {
         LoadingDataVue,
         NoDataVue,
         ErrorDataVue,
+        TestCaseModalVue,
+        TestSuiteModalVue,
     },
     setup() {
         // Create data/vars
@@ -123,7 +158,18 @@ export default {
         // Run data function
         getData();
 
-        return { dataLoaded, noData, error, testCategories, testSuites, testCases };
+        const testCaseId = ref(null)
+        const testSuiteId = ref(null)
+
+        const loadTestCaseModal = (id) => {
+            testCaseId.value = id;
+        };
+
+        const loadTestSuiteModal = (id) => {
+            testSuiteId.value = id;
+        };
+
+        return { dataLoaded, testCaseId, testSuiteId, loadTestCaseModal, loadTestSuiteModal, noData, error, testCategories, testSuites, testCases };
     },
 }
 </script>

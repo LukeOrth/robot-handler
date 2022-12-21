@@ -58,7 +58,7 @@ class RobotParser(ast.NodeVisitor):
         self.test_suite = None
         self.test_cases = []
         self.test_suite_tags = []
-        self.test_case_tags = []
+        self.test_case_tags = {}
         self.metadata = []
         self.libraries = []
         self.templates = []
@@ -137,7 +137,11 @@ class RobotParser(ast.NodeVisitor):
                         for tag in n.values:
                             tc_tags = TagPrototype()
                             tc_tags.name = tag
-                            self.test_case_tags.append(tc_tags)
+                            if tc.name in self.test_case_tags:
+                                self.test_case_tags[tc.name].append(tc_tags)
+                            else:
+                                self.test_case_tags[tc.name] = [tc_tags]
+                            # self.test_case_tags.append({tc.name: [tc_tags]})
                     # TestCase: setup
                     if type(n) == Setup:
                         tc.setup = n.name
@@ -210,10 +214,17 @@ def run(tests_dir):
                 tc.save()
                 results['test_cases'] += 1
 
-                for tag in parser.test_case_tags:
-                    t = Tag(**tag.__dict__)
-                    t.save()
-                    tc.tags.add(t)
+                for k, v in parser.test_case_tags.items():
+                    if k == tc.name:
+                        for tag in v:
+                            t = Tag(**tag.__dict__)
+                            t.save()
+                            tc.tags.add(t)
+
+                # for tag in parser.test_case_tags:
+                #     t = Tag(**tag.__dict__)
+                #     t.save()
+                #     tc.tags.add(t)
 
                 for template in parser.templates:
                     tmp = Template(**template.__dict__)

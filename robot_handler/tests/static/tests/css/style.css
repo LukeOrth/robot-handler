@@ -21,15 +21,16 @@ th input::placeholder {
   position: relative;
 }
 
-.list-group-item:hover {
+.clickable-list-item:hover {
   background-color: var(--bs-border-color);
+  cursor: pointer;
 }
 
-.list-group-item:hover .test-case-item {
+.clickable-list-item:hover .test-case-item {
   -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 60%, rgba(0,0,0,0));
 }
 
-.list-group-item:hover .hide {
+.clickable-list-item:hover .hide {
   display: inline-block;
 }
 
