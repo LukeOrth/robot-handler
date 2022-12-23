@@ -4,8 +4,8 @@
             <div class="col">
 
                 <!-- Data -->
-                <TestCaseModalVue :tcID="testCaseId" />
-                <TestSuiteModalVue :tsID="testSuiteId" />
+                <TestCaseModalVue @updateTsId="loadTestSuiteModal" :tcID="testCaseId" />
+                <TestSuiteModalVue @updateTcId="loadTestCaseModal" :tsID="testSuiteId" />
 
                 <div v-if="dataLoaded" class="accordion accordion-flush" id="accordionFlushExample">
 
@@ -57,10 +57,10 @@
                                                                 d="M9.525 18.025q-.5.325-1.013.037Q8 17.775 8 17.175V6.825q0-.6.512-.888q.513-.287 1.013.038l8.15 5.175q.45.3.45.85t-.45.85Z" />
                                                         </svg>
                                                     </div>
-                                                    <p v-for="tag in test_case.tags" v-bind:key="tag"
+                                                    <small v-for="tag in test_case.tags" v-bind:key="tag"
                                                         class="float-start me-2 mb-1">
                                                         <span class="badge text-bg-warning">{{ tag.name }}</span>
-                                                    </p>
+                                                    </small>
                                                 </li>
                                             </ul>
                                             <div class="card-footer">

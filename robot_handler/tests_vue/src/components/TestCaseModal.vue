@@ -1,7 +1,6 @@
 <template>
 
-    <div class="modal fade" id="testCaseModal" tabindex="-1" aria-labelledby="testCaseModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="testCaseModal" tabindex="-1" aria-labelledby="testCaseModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -19,13 +18,16 @@
                             </tr>
                             <tr>
                                 <th scope="row">Documentation</th>
-                                <td><pre style="white-space: pre-wrap;">{{ testCase.documentation }}</pre></td>
+                                <td>
+                                    <pre style="white-space: pre-wrap;">{{ testCase.documentation }}</pre>
+                                </td>
                             </tr>
                             <tr>
                                 <th scope="row">Included In</th>
                                 <td>
                                     <ul class="list-group">
-                                        <li class="list-group-item">
+                                        <li class="list-group-item clickable-list-item" data-bs-toggle="modal"
+                                            data-bs-target="#testSuiteModal" @click="updateTsId()">
                                             <div class="ms-2 me-auto">
                                                 <div>{{ testSuiteName }}</div>
                                                 <small v-for="tag in testSuiteTags" v-bind:key="tag"
@@ -65,12 +67,13 @@ export default {
     props: {
         tcID: Number
     },
-    setup(props) {
+    setup(props, { emit }) {
         const testCaseId = ref(null)
         const testCase = ref({})
         const testCategory = ref(null)
         const testSuiteName = ref(null)
         const testSuiteTags = ref(null)
+        const testSuiteId = ref(null)
 
         watch(() => props.tcID, (newVal) => {
             testCaseId.value = newVal
@@ -78,14 +81,19 @@ export default {
             if (testCaseId.value) {
                 testCase.value = store.methods.getTestCase(props.tcID)
 
-                const { name, test_category, tags } = store.methods.getTestSuite(testCase.value.test_suite)
+                const { name, test_category, tags, id } = store.methods.getTestSuite(testCase.value.test_suite)
                 testCategory.value = test_category.name
                 testSuiteName.value = name
                 testSuiteTags.value = tags
+                testSuiteId.value = id
             }
         })
 
-        return { testCase, testCategory, testSuiteName, testSuiteTags };
+        const updateTsId = () => {
+            emit("updateTsId", testSuiteId.value)
+        }
+
+        return { testCase, testCategory, testSuiteName, testSuiteTags, testSuiteId, updateTsId };
     },
 }
 </script>

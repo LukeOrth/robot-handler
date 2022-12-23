@@ -27,7 +27,8 @@
                                 <td>
                                     <ul class="list-group">
                                         <li v-for="test_case in testSuite.test_cases" v-bind:key="test_case.id"
-                                            class="list-group-item">
+                                            class="list-group-item clickable-list-item" data-bs-toggle="modal"
+                                            data-bs-target="#testCaseModal" @click="updateTcId(test_case.id)">
                                             <div class="ms-2 me-auto">
                                                 <div>{{ test_case.name }}</div>
                                                 <small v-for="tag in test_case.tags" v-bind:key="tag"
@@ -67,7 +68,7 @@ export default {
     props: {
         tsID: Number
     },
-    setup(props) {
+    setup(props, { emit }) {
         const testSuiteId = ref(null)
         const testSuite = ref({})
         const testCategory = ref(null)
@@ -81,7 +82,11 @@ export default {
             }
         })
 
-        return { testSuite, testCategory };
+        const updateTcId = (id) => {
+            emit("updateTcId", id)
+        }
+
+        return { testSuite, testCategory, updateTcId };
     },
 }
 </script>
