@@ -36,6 +36,9 @@ const methods = {
     getTestSuite(id) {
         return state.testSuites.find(ts => ts.id === id);
     },
+    getTestTag(id) {
+        return state.testTags.find(tt => tt.id === id);
+    },
 }
 
 export default {

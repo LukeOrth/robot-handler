@@ -21,6 +21,11 @@ th input::placeholder {
   position: relative;
 }
 
+.clickable-tag-item:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
 .clickable-list-item:hover {
   background-color: var(--bs-border-color);
   cursor: pointer;

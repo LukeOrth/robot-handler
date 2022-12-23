@@ -6,6 +6,7 @@
                 <!-- Data -->
                 <TestCaseModalVue @updateTsId="loadTestSuiteModal" :tcID="testCaseId" />
                 <TestSuiteModalVue @updateTcId="loadTestCaseModal" :tsID="testSuiteId" />
+                <TestTagModalVue :ttID="testTagId" />
 
                 <div v-if="dataLoaded" class="accordion accordion-flush" id="accordionFlushExample">
 
@@ -58,14 +59,17 @@
                                                         </svg>
                                                     </div>
                                                     <small v-for="tag in test_case.tags" v-bind:key="tag"
-                                                        class="float-start me-2 mb-1">
+                                                        class="float-start me-2 mb-1 clickable-tag-item"
+                                                        data-bs-toggle="modal" data-bs-target="#testTagModal"
+                                                        @click="loadTestTagModal(tag.name)">
                                                         <span class="badge text-bg-warning">{{ tag.name }}</span>
                                                     </small>
                                                 </li>
                                             </ul>
                                             <div class="card-footer">
                                                 <small v-for="tag in test_suite.tags" v-bind:key="tag"
-                                                    class="float-end me-2">
+                                                    class="float-end me-2 clickable-tag-item" data-bs-toggle="modal"
+                                                    data-bs-target="#testTagModal" @click="loadTestTagModal(tag.name)">
                                                     <span class="badge text-bg-primary">{{ tag.name }}</span>
                                                 </small>
                                                 <small class="float-end me-2">Tags: </small>
@@ -99,6 +103,7 @@ import LoadingDataVue from '@/components/LoadingData.vue';
 import ErrorDataVue from '@/components/ErrorData.vue';
 import TestCaseModalVue from '@/components/TestCaseModal.vue';
 import TestSuiteModalVue from '@/components/TestSuiteModal.vue';
+import TestTagModalVue from '@/components/TestTagModal.vue';
 import store from "../store/index.js"
 
 export default {
@@ -109,6 +114,7 @@ export default {
         ErrorDataVue,
         TestCaseModalVue,
         TestSuiteModalVue,
+        TestTagModalVue,
     },
     setup() {
         // Create data/vars
@@ -117,6 +123,7 @@ export default {
         const error = ref(null);
 
         const testCategories = ref([]);
+        const testTags = ref([])
         const testSuites = ref([]);
         const testCases = ref([]);
 
@@ -142,9 +149,69 @@ export default {
                         } else {
                             testCategories.value[index].test_suites.push(test_suite);
                         }
+                        test_suite.tags.forEach(tag => {
+                            const index = testTags.value.findIndex(t => t.name == tag.name);
+                            if (index === -1) {
+                                testTags.value.push(
+                                    {
+                                        id: tag.name.replace(/\s+/g, '-').toLowerCase(),
+                                        name: tag.name,
+                                        test_categories: [test_suite.test_category],
+                                        test_suites: [test_suite],
+                                        test_cases: [test_suite.test_cases]
+                                    }
+                                );
+                            } else {
+                                const cat_index = testTags.value[index].test_categories.findIndex(c => c.name == test_suite.test_category.name);
+                                if (cat_index === -1) {
+                                    testTags.value[index].test_categories.push(test_suite.test_category)
+                                }
+                                const suite_index = testTags.value[index].test_categories.findIndex(ts => ts.id == test_suite.id)
+                                if (suite_index === -1) {
+                                    testTags.value[index].test_suites.push(test_suite);
+                                }
+                                test_suite.test_cases.forEach(test_case => {
+                                    const case_index = testTags.value[index].test_categories.findIndex(tc => tc.id == test_case.id)
+                                    if (case_index === -1) {
+                                        testTags.value[index].test_cases.push(test_case)
+                                    }
+                                })
+                            }
+                        });
+                        test_suite.test_cases.forEach(test_case => {
+                            testCases.value.push(test_case)
+
+                            test_case.tags.forEach(tag => {
+                                const index = testTags.value.findIndex(t => t.name == tag.name);
+                                if (index === -1) {
+                                    testTags.value.push(
+                                        {
+                                            id: tag.name.replace(/\s+/g, '-').toLowerCase(),
+                                            name: tag.name,
+                                            test_categories: [test_suite.test_category],
+                                            test_suites: [test_suite],
+                                            test_cases: [test_case]
+                                        }
+                                    );
+                                } else {
+                                    const cat_index = testTags.value[index].test_categories.findIndex(c => c.name == test_suite.test_category.name);
+                                    if (cat_index === -1) {
+                                        testTags.value[index].test_categories.push(test_suite.test_category)
+                                    }
+                                    const ts_index = testTags.value[index].test_suites.findIndex(ts => ts.id == test_suite.id)
+                                    if (ts_index === -1) {
+                                        testTags.value[index].test_suites.push(test_suite);
+                                    }
+                                    const tc_index = testTags.value[index].test_categories.findIndex(tc => tc.id == test_case.id)
+                                    if (tc_index === -1) {
+                                        testTags.value[index].test_cases.push(test_case)
+                                    }
+                                }
+                            })
+                        })
                         testSuites.value.push(test_suite);
-                        test_suite.test_cases.forEach(test_case => testCases.value.push(test_case))
                     });
+                    store.methods.setTestTags(testTags);
                     store.methods.setTestCategories(testCategories);
                     store.methods.setTestSuites(testSuites);
                     store.methods.setTestCases(testCases);
@@ -160,6 +227,7 @@ export default {
 
         const testCaseId = ref(null)
         const testSuiteId = ref(null)
+        const testTagId = ref(null)
 
         const loadTestCaseModal = (id) => {
             testCaseId.value = id;
@@ -169,7 +237,14 @@ export default {
             testSuiteId.value = id;
         };
 
-        return { dataLoaded, testCaseId, testSuiteId, loadTestCaseModal, loadTestSuiteModal, noData, error, testCategories, testSuites, testCases };
+        const loadTestTagModal = (name) => {
+            testTagId.value = name;
+        }
+
+        return {
+            dataLoaded, testCaseId, testSuiteId, testTagId, loadTestCaseModal, loadTestSuiteModal, loadTestTagModal,
+            noData, error, testCategories, testTags, testSuites, testCases
+        };
     },
 }
 </script>
